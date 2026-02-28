@@ -121,7 +121,7 @@ jobs:
           exit-code: '1'
           severity: 'CRITICAL'
 
-  # ═══════════════════════════════════════
+  # ═══════════════════════════════════════ 
   # 6. RAPPORT FINAL
   # Génère un résumé de tous les scans de sécurité
   # Vérifie le statut de chaque job et fait ÉCHOUER le pipeline si des vulnérabilités sont détectées
