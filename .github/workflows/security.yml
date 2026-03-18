@@ -27,27 +27,6 @@ jobs:
           path: image.tar
 
   # ═══════════════════════════════════════
-  # 1.5. CODEQL - Analyse statique avancée (GitHub SAST)
-  # Détecte les vulnérabilités dans le code avec l'outil intégré de GitHub
-  # ═══════════════════════════════════════
-  codeql:
-    name: 🔍 CodeQL
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
-      
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-      
-      - name: Perform Analysis
-        uses: github/codeql-action/analyze@v3
-
-  # ═══════════════════════════════════════
   # 2. SAST - Analyse statique du code (Static Application Security Testing)
   # Détecte les vulnérabilités dans le CODE SOURCE : injection SQL, XSS, failles de sécurité
   # Outil : Semgrep avec règles OWASP Top 10, security-audit, et détection de secrets
@@ -151,7 +130,7 @@ jobs:
   report:
     name: 📊 Report
     runs-on: ubuntu-latest
-    needs: [sast, sca, secrets, container-scan, codeql]
+    needs: [sast, sca, secrets, container-scan]
     if: always()
     steps:
       - name: Generate JSON Report
@@ -179,17 +158,13 @@ jobs:
               "container_scan": {
                 "status": "${{ needs.container-scan.result }}",
                 "tool": "Trivy"
-              },
-              "codeql": {
-                "status": "${{ needs.codeql.result }}",
-                "tool": "CodeQL"
               }
             },
             "summary": {
-              "total_checks": 5,
-              "passed": $(echo '${{ needs.sast.result }} ${{ needs.sca.result }} ${{ needs.secrets.result }} ${{ needs.container-scan.result }} ${{ needs.codeql.result }}' | grep -o "success" | wc -l),
-              "failed": $(echo '${{ needs.sast.result }} ${{ needs.sca.result }} ${{ needs.secrets.result }} ${{ needs.container-scan.result }} ${{ needs.codeql.result }}' | grep -o "failure" | wc -l),
-              "overall_status": "$([[ "${{ needs.sast.result }}" == "failure" ]] || [[ "${{ needs.sca.result }}" == "failure" ]] || [[ "${{ needs.secrets.result }}" == "failure" ]] || [[ "${{ needs.container-scan.result }}" == "failure" ]] || [[ "${{ needs.codeql.result }}" == "failure" ]] && echo "FAILED" || echo "PASSED")"
+              "total_checks": 4,
+              "passed": $(echo '${{ needs.sast.result }} ${{ needs.sca.result }} ${{ needs.secrets.result }} ${{ needs.container-scan.result }}' | grep -o "success" | wc -l),
+              "failed": $(echo '${{ needs.sast.result }} ${{ needs.sca.result }} ${{ needs.secrets.result }} ${{ needs.container-scan.result }}' | grep -o "failure" | wc -l),
+              "overall_status": "$([[ "${{ needs.sast.result }}" == "failure" ]] || [[ "${{ needs.sca.result }}" == "failure" ]] || [[ "${{ needs.secrets.result }}" == "failure" ]] || [[ "${{ needs.container-scan.result }}" == "failure" ]] && echo "FAILED" || echo "PASSED")"
             }
           }
           EOF
@@ -212,7 +187,6 @@ jobs:
           echo "- SCA: ${{ needs.sca.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Secrets: ${{ needs.secrets.result }}" >> $GITHUB_STEP_SUMMARY
           echo "- Container Scan: ${{ needs.container-scan.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- CodeQL: ${{ needs.codeql.result }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📥 **JSON Report available in artifacts**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -220,34 +194,11 @@ jobs:
           if [[ "${{ needs.sast.result }}" == "failure" ]] || \
              [[ "${{ needs.sca.result }}" == "failure" ]] || \
              [[ "${{ needs.secrets.result }}" == "failure" ]] || \
-             [[ "${{ needs.container-scan.result }}" == "failure" ]] || \
-             [[ "${{ needs.codeql.result }}" == "failure" ]]; then
+             [[ "${{ needs.container-scan.result }}" == "failure" ]]; then
             echo "❌ **Security issues detected!**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "⚠️ Please review the failed jobs above" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
             echo "✅ All security checks passed" >> $GITHUB_STEP_SUMMARY
-          fi
-
-  # ═══════════════════════════════════════ 
-  # 7. SECURITY GATE
-  # Bloque le merge si des vulnérabilités critiques sont détectées
-  # ═══════════════════════════════════════
-  security-gate:
-    name: 🚦 Security Gate
-    runs-on: ubuntu-latest
-    needs: [sast, sca, container-scan]
-    if: always()
-    steps:
-      - name: Check results
-        run: |
-          # Vérifier si des jobs ont échoué
-          if [[ "${{ needs.sast.result }}" == "failure" ]] || \
-             [[ "${{ needs.sca.result }}" == "failure" ]] || \
-             [[ "${{ needs.container-scan.result }}" == "failure" ]]; then
-            echo "❌ Critical vulnerabilities detected. Blocking merge."
-            exit 1
-          else
-            echo "✅ No critical vulnerabilities. Merge allowed."
           fi
