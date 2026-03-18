@@ -1,4 +1,4 @@
-# ✅ Image node
+# ✅ Image Alpine (plus légère et sécurisée) - Version la plus récente
 FROM node:22-alpine
 
 WORKDIR /app
@@ -9,9 +9,9 @@ RUN npm install --omit=dev && npm cache clean --force
 
 COPY src/ ./
 
-# ✅ Utilisateur non-root (Alpine)
-RUN addgroup -g 1001 nodejs && \
-    adduser -D -u 1001 -G nodejs nodejs && \
+# ✅ Utilisateur non-root
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 && \
     chown -R nodejs:nodejs /app
 
 USER nodejs
