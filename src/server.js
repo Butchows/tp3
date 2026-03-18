@@ -55,6 +55,13 @@ app.post('/api/login',
   }
 );
 
+// 🚨 Vulnérabilité ajoutée : Injection SQL
+app.get('/api/users', (req, res) => {
+  const userId = req.query.id; // Pas de validation/sanitisation
+  const query = `SELECT * FROM users WHERE id = '${userId}'`; // Injection SQL possible
+  res.json({ query }); // Simulation : retourne la requête (ne l'exécute pas)
+});
+
 // ✅ Endpoint de santé (sans infos sensibles)
 app.get('/health', (req, res) => {
   res.json({ status: 'OK' });
