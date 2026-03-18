@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 
@@ -14,6 +15,13 @@ if (!SECRET || SECRET.length < 32) {
   console.error('JWT_SECRET must be set and at least 32 characters');
   process.exit(1);
 }
+
+// ✅ Créer DB SQLite en mémoire pour simulation
+const db = new sqlite3.Database(':memory:');
+db.serialize(() => {
+  db.run("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)");
+  db.run("INSERT INTO users (name) VALUES ('Alice'), ('Bob'), ('Charlie')");
+});
 
 // ✅ Sécurité
 app.use(helmet());
@@ -58,8 +66,14 @@ app.post('/api/login',
 // 🚨 Vulnérabilité ajoutée : Injection SQL
 app.get('/api/users', (req, res) => {
   const userId = req.query.id; // Pas de validation/sanitisation
-  const query = `SELECT * FROM users WHERE id = '${userId}'`; // Injection SQL possible
-  res.json({ query }); // Simulation : retourne la requête (ne l'exécute pas)
+  const query = `SELECT * FROM users WHERE id = ${userId}`; // Injection SQL réelle
+  
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.json({ users: rows });
+  });
 });
 
 // ✅ Endpoint de santé (sans infos sensibles)
