@@ -1,4 +1,9 @@
- codeql:
+name: CodeQL
+
+on: [push, pull_request]
+
+jobs:
+  codeql:
     name: 🔍 CodeQL
     runs-on: ubuntu-latest
     steps:
