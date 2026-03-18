@@ -1,5 +1,5 @@
-# ✅ Image Alpine (plus légère et sécurisée) - Version stable sans vulnérabilités connues
-FROM node:18-alpine
+# ✅ Image Debian slim (plus stable et sans vulnérabilités Alpine)
+FROM node:18-bullseye-slim
 
 WORKDIR /app
 
