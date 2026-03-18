@@ -6,6 +6,7 @@ jobs:
   codeql:
     name: 🔍 CodeQL
     runs-on: ubuntu-latest
+    security-events: read
     steps:
       - uses: actions/checkout@v4
       
