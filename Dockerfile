@@ -1,5 +1,5 @@
-# ✅ Image Debian slim (version 16 pour éviter vulnérabilités récentes)
-FROM node:16-bullseye-slim
+# ✅ Image node
+FROM node:22-alpine
 
 WORKDIR /app
 
