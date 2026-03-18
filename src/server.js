@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-const sqlite3 = require('sqlite3').verbose();
+const sqlite = require('better-sqlite3');
 
 const app = express();
 
@@ -17,11 +17,12 @@ if (!SECRET || SECRET.length < 32) {
 }
 
 // ✅ Créer DB SQLite en mémoire pour simulation
-const db = new sqlite3.Database(':memory:');
-db.serialize(() => {
-  db.run("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)");
-  db.run("INSERT INTO users (name) VALUES ('Alice'), ('Bob'), ('Charlie')");
-});
+const db = sqlite(':memory:');
+db.exec("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)");
+const insert = db.prepare("INSERT INTO users (name) VALUES (?)");
+insert.run('Alice');
+insert.run('Bob');
+insert.run('Charlie');
 
 // ✅ Sécurité
 app.use(helmet());
@@ -70,14 +71,13 @@ app.get('/api/users', (req, res) => {
     return res.status(400).json({ error: 'Invalid user ID' });
   }
   
-  const query = `SELECT * FROM users WHERE id = ?`; // Prepared statement
-  
-  db.all(query, [userId], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json({ users: rows });
-  });
+  try {
+    const stmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
+    const users = stmt.all(userId);
+    res.json({ users });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ✅ Endpoint de santé (sans infos sensibles)

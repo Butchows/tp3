@@ -10,8 +10,8 @@ RUN npm install --omit=dev && npm cache clean --force
 COPY src/ ./
 
 # ✅ Utilisateur non-root
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001 && \
+RUN groupadd -g 1001 nodejs && \
+    useradd -u 1001 -g nodejs nodejs && \
     chown -R nodejs:nodejs /app
 
 USER nodejs
