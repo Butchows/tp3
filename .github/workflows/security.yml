@@ -203,14 +203,25 @@ jobs:
             echo "✅ All security checks passed" >> $GITHUB_STEP_SUMMARY
           fi
 
-
-           security-gate:
+  # ═══════════════════════════════════════ 
+  # 7. SECURITY GATE
+  # Bloque le merge si des vulnérabilités critiques sont détectées
+  # ═══════════════════════════════════════
+  security-gate:
     name: 🚦 Security Gate
     runs-on: ubuntu-latest
     needs: [sast, sca, container-scan]
+    if: always()
     steps:
       - name: Check results
         run: |
           # Logique pour vérifier les résultats
           # Exit 1 si critique trouvé
-          echo "✅ No critical vulnerabilities"
+          if [[ "${{ needs.sast.result }}" == "failure" ]] || \
+             [[ "${{ needs.sca.result }}" == "failure" ]] || \
+             [[ "${{ needs.container-scan.result }}" == "failure" ]]; then
+            echo "❌ Critical vulnerabilities detected. Blocking merge."
+            exit 1
+          else
+            echo "✅ No critical vulnerabilities"
+          fi
