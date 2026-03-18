@@ -1,5 +1,5 @@
-# ✅ Image Debian slim (plus stable et sans vulnérabilités Alpine)
-FROM node:18-bullseye-slim
+# ✅ Image Debian slim (version 16 pour éviter vulnérabilités récentes)
+FROM node:16-bullseye-slim
 
 WORKDIR /app
 
