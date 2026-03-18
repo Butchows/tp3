@@ -30,3 +30,5 @@ Le pipeline inclut :
 - Utilisateur non-root dans Docker
 - Healthcheck intégré
 - Pas d'endpoint debug en production
+
+![Security](https://github.com/<user>/<repo>/workflows/DevSecOps%20Pipeline/badge.svg)
