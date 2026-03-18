@@ -63,12 +63,16 @@ app.post('/api/login',
   }
 );
 
-// 🚨 Vulnérabilité ajoutée : Injection SQL
+// ✅ Injection SQL corrigée : Utiliser prepared statements
 app.get('/api/users', (req, res) => {
-  const userId = req.query.id; // Pas de validation/sanitisation
-  const query = `SELECT * FROM users WHERE id = ${userId}`; // Injection SQL réelle
+  const userId = req.query.id;
+  if (!userId || isNaN(userId)) {
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
   
-  db.all(query, [], (err, rows) => {
+  const query = `SELECT * FROM users WHERE id = ?`; // Prepared statement
+  
+  db.all(query, [userId], (err, rows) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }

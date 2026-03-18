@@ -1,5 +1,5 @@
-# ✅ Image Alpine (plus légère et sécurisée) - Version la plus récente
-FROM node:22-alpine
+# ✅ Image Alpine (plus légère et sécurisée) - Version stable sans vulnérabilités connues
+FROM node:18-alpine
 
 WORKDIR /app
 
