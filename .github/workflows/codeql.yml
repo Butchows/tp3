@@ -1,0 +1,28 @@
+name: CodeQL
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  codeql:
+    name: 🔍 CodeQL
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+      
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+      
+      - name: Perform Analysis
+        uses: github/codeql-action/analyze@v3
