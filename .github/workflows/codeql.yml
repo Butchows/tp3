@@ -1,13 +1,6 @@
-name: CodeQL
-
-on: [push, pull_request]
-
-jobs:
   codeql:
     name: 🔍 CodeQL
     runs-on: ubuntu-latest
-    permissions:
-      security-events: read
     steps:
       - uses: actions/checkout@v4
       
