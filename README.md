@@ -31,4 +31,4 @@ Le pipeline inclut :
 - Healthcheck intégré
 - Pas d'endpoint debug en production
 
-![Security](https://github.com/<user>/<repo>/workflows/DevSecOps%20Pipeline/badge.svg)
+![Security](https://github.com/butchows/tp3/workflows/DevSecOps%20Pipeline/badge.svg)
